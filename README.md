@@ -5,6 +5,5 @@ https://github.com/drewthedogloverandcooldudelol-sketch/quest-adb-terminal/relea
 
 
 
-https://chat.freedomgpt.com/share/SY05BVfwmuVTeHp41Tu9
-
+https://chat.freedomgpt.com/share/5ImkZJFZcIhz6nrhTjSm
 
