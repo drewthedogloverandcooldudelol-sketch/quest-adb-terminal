@@ -13,8 +13,6 @@ jobs:
           java-version: '17'
       - name: sdk
         run: SDK="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"; SM="$SDK/cmdline-tools/latest/bin/sdkmanager"; [ -x "$SM" ] || SM=$(find "$SDK" -name sdkmanager -type f 2>/dev/null | head -1); yes | "$SM" --licenses >/dev/null 2>&1 || true; "$SM" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125" "cmake;3.22.1"
-      - name: file sizes
-        run: find app -type f -exec wc -c {} \; | sort -n
       - name: write gradle files
         run: |
           rm -f build.gradle.kts
@@ -24,19 +22,22 @@ jobs:
         run: |
           mkdir -p app/src/main/res/values
           printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<resources>' '    <string name="app_name">Quest ADB Terminal</string>' '</resources>' > app/src/main/res/values/strings.xml
-          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<manifest xmlns:android="http://schemas.android.com/apk/res/android">' '    <uses-permission android:name="android.permission.INTERNET" />' '    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' '    <uses-permission android:name="android.permission.WAKE_LOCK" />' '    <application android:label="@string/app_name" android:allowBackup="false" android:theme="@android:style/Theme.Material.NoActionBar">' '        <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|density|uiMode">' '            <intent-filter>' '                <action android:name="android.intent.action.MAIN" />' '                <category android:name="android.intent.category.LAUNCHER" />' '            </intent-filter>' '        </activity>' '    </application>' '</manifest>' > app/src/main/AndroidManifest.xml
+          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<manifest xmlns:android="http://schemas.android.com/apk/res/android">' '    <uses-permission android:name="android.permission.INTERNET" />' '    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' '    <uses-permission android:name="android.permission.WAKE_LOCK" />' '    <application android:label="@string/app_name" android:icon="@android:drawable/sym_def_app_icon" android:allowBackup="false" android:hardwareAccelerated="true" android:theme="@android:style/Theme.Material.NoActionBar">' '        <activity android:name=".MainActivity" android:exported="true" android:resizeableActivity="true" android:launchMode="singleTask" android:screenOrientation="landscape" android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|density|uiMode">' '            <intent-filter>' '                <action android:name="android.intent.action.MAIN" />' '                <category android:name="android.intent.category.LAUNCHER" />' '                <category android:name="com.oculus.intent.category.2D" />' '            </intent-filter>' '        </activity>' '    </application>' '</manifest>' > app/src/main/AndroidManifest.xml
           printf '%s\n' 'cmake_minimum_required(VERSION 3.22.1)' 'project(qadb C)' 'set(CMAKE_C_STANDARD 11)' 'add_library(qadb SHARED persistent_shell.c)' 'find_library(log-lib log)' 'target_link_libraries(qadb ${log-lib})' > app/src/main/cpp/CMakeLists.txt
+      - name: show manifest
+        run: cat app/src/main/AndroidManifest.xml
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
       - run: gradle :app:assembleDebug --no-daemon
+      - run: cp app/build/outputs/apk/debug/app-debug.apk app-debug.apk
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: apk
-          path: app/build/outputs/apk/**/*.apk
+          path: app-debug.apk
       - uses: softprops/action-gh-release@v2
         continue-on-error: true
         with:
           tag_name: v${{ github.run_number }}
-          files: app/build/outputs/apk/**/*.apk
+          files: app-debug.apk
