@@ -11,12 +11,18 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - run: SDK="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"; SM="$SDK/cmdline-tools/latest/bin/sdkmanager"; [ -x "$SM" ] || SM=$(find "$SDK" -name sdkmanager -type f 2>/dev/null | head -1); echo "SDK=$SDK  SM=$SM"; yes | "$SM" --licenses >/dev/null 2>&1 || true; "$SM" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125" "cmake;3.22.1"
+      - run: SDK="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"; SM="$SDK/cmdline-tools/latest/bin/sdkmanager"; [ -x "$SM" ] || SM=$(find "$SDK" -name sdkmanager -type f 2>/dev/null | head -1); yes | "$SM" --licenses >/dev/null 2>&1 || true; "$SM" "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125" "cmake;3.22.1"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
       - run: gradle assembleDebug --no-daemon
+      - run: find app/build/outputs -name '*.apk'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: app/build/outputs/apk/**/*.apk
       - uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: v${{ github.run_number }}
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/**/*.apk
