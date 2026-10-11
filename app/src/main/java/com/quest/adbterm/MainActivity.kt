@@ -6,7 +6,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
+import android.os.Loader
 import android.os.ParcelFileDescriptor
 import android.os.Process
 import android.os.SystemClock
@@ -63,7 +63,7 @@ class MainActivity : Activity() {
   private var readFd = -1
   private var writeFd = -1
   private var stopping = false
-  private var autoScroll = true
+  private var autoScroll = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -137,6 +137,15 @@ class MainActivity : Activity() {
       typeface = mono
       textSize = 10f
     })
+
+    // ROOT FUGU BUTTON - Added for Singularity-style root attempt
+    root.addView(button("ROOT FUGU (Singularity Style)") { attemptFuguRoot() },
+      LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
+        marginStart = dp(0)
+        marginEnd = dp(0)
+        marginTop = dp(8)
+        marginBottom = dp(8)
+      })
 
     scroll = ScrollView(this).apply {
       setBackgroundColor(Color.BLACK)
@@ -219,6 +228,36 @@ class MainActivity : Activity() {
         LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f).apply { marginEnd = dp(4) })
     }
     return row
+  }
+
+  // ---------------------------------------------------------------- fugu root
+
+  private fun attemptFuguRoot() {
+    emit("\n=== FUGU ROOT ATTEMPT (Singularity Style) ===\n", warn)
+    emit("WARNING: This attempts known Fugu (Intel Android TV) exploits.\n", warn)
+    emit("Your Fugu device must have USB debugging enabled.\n", warn)
+    emit("This may NOT work on your specific Android version.\n\n", warn)
+
+    // Check if any device is connected
+    emit("Checking for connected devices...\n", info)
+    exec("adb devices -l")
+
+    emit("\n[INFO] Fugu Root Requirements:\n", fgDim)
+    emit("1. Device must be a Fugu (Intel Android TV box)\n", fgDim)
+    emit("2. USB debugging must be enabled on the Fugu\n", fgDim)
+    emit("3. You need the specific exploit binary for your Android version\n", fgDim)
+    emit("\n[INFO] Current Status:\n", fgDim)
+    emit("Fugu devices were last rooted years ago using specific Intel Atom exploits.\n", fgDim)
+    emit("Android version 5.0-5.1 had known vulnerabilities, newer versions are patched.\n", fgDim)
+    emit("\n[INFO] Next Steps:\n", fgDim)
+    emit("1. Check your Fugu's Android version: adb shell getprop ro.build.version.release\n", fgDim)
+    emit("2. Search XDA Developers for 'Fugu root' + your Android version\n", fgDim)
+    emit("3. Download the specific exploit binary for your device\n", fgDim)
+    emit("4. Place the exploit in your app's assets folder\n", fgDim)
+    emit("5. Modify this code to push and execute the specific exploit\n", fgDim)
+    emit("\n[INFO] Without the actual exploit binary, root is not possible.\n", warn)
+    emit("The button above can only automate existing exploits, not create new ones.\n", warn)
+    emit("\n=== Root attempt info completed ===\n", fgDim)
   }
 
   // ---------------------------------------------------------------- logging
@@ -381,7 +420,6 @@ class MainActivity : Activity() {
   private fun printFirstRunHelp() {
     emit(
       """
-      |
       |+--------------------------------------------------------------+
       ||  PAIR THIS HEADSET WITH ITS OWN ADB SERVER                    |
       |+--------------------------------------------------------------+
